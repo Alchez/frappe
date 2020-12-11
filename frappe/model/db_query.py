@@ -265,7 +265,7 @@ class DatabaseQuery(object):
 		if self.fields:
 			for f in self.fields:
 				if ( not ("tab" in f and "." in f) ) or ("locate(" in f) or ("strpos(" in f) or \
-					("count(" in f) or ("avg(" in f)  or ("sum(" in f):
+					("count(" in f) or ("avg(" in f)  or ("sum(" in f) or ("extract(" in f) or ("dayofyear(" in f):
 					continue
 
 				table_name = f.split('.')[0]
@@ -289,7 +289,7 @@ class DatabaseQuery(object):
 		'''If there are more than one table, the fieldname must not be ambiguous.
 		If the fieldname is not explicitly mentioned, set the default table'''
 		def _in_standard_sql_methods(field):
-			methods = ('count(', 'avg(', 'sum(')
+			methods = ('count(', 'avg(', 'sum(', 'extract(', 'dayofyear(')
 			return field.lower().startswith(methods)
 
 		if len(self.tables) > 1:

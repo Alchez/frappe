@@ -86,7 +86,7 @@ class WidgetDialog {
 		this.filter_group = new frappe.ui.FilterGroup({
 			parent: this.dialog.get_field("filter_area").$wrapper,
 			doctype: doctype,
-			on_change: () => {},
+			on_change: () => { },
 		});
 
 		frappe.model.with_doctype(doctype, () => {
@@ -444,6 +444,21 @@ class NumberCardDialog extends WidgetDialog {
 				options: ['New Card', 'Existing Card']
 			},
 			{
+				label: __('Doctype'),
+				fieldname: 'document_type',
+				fieldtype: 'Link',
+				options: 'DocType',
+				onchange: () => {
+					this.document_type = this.dialog.get_value("document_type");
+					this.set_aggregate_function_fields();
+					if (this.document_type) {
+						this.setup_filter(this.document_type);
+					}
+				},
+				depends_on: 'eval: doc.new_or_existing == "New Card" || doc.new_or_existing == "Existing Card"',
+				mandatory_depends_on: 'eval: doc.new_or_existing == "New Card"'
+			},
+			{
 				fieldtype: 'Link',
 				fieldname: 'card',
 				label: __('Number Cards'),
@@ -468,18 +483,6 @@ class NumberCardDialog extends WidgetDialog {
 				fieldname: 'label',
 				fieldtype: 'Data',
 				mandatory_depends_on: 'eval: doc.new_or_existing == "New Card"'
-			},
-			{
-				label: __('Doctype'),
-				fieldname: 'document_type',
-				fieldtype: 'Link',
-				options: 'DocType',
-				onchange: () => {
-					this.document_type = this.dialog.get_value("document_type");
-					this.set_aggregate_function_fields(this.dialog.get_values());
-					this.setup_filter(this.document_type);
-				},
-				hidden: 1
 			},
 			{
 				label: __('Color'),
@@ -541,6 +544,7 @@ class NumberCardDialog extends WidgetDialog {
 	}
 
 	set_aggregate_function_fields() {
+		let fields = [];
 		let aggregate_function_fields = [];
 		if (this.document_type && frappe.get_meta(this.document_type)) {
 			frappe.get_meta(this.document_type).fields.map(df => {
@@ -550,7 +554,7 @@ class NumberCardDialog extends WidgetDialog {
 							return;
 						}
 					}
-					aggregate_function_fields.push({label: df.label, value: df.fieldname});
+					aggregate_function_fields.push({ label: df.label, value: df.fieldname });
 				}
 			});
 		}

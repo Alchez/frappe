@@ -21,6 +21,11 @@
   "public",
   "content",
   "tab_break_2",
+  "sb_number_cards",
+  "number_cards_label",
+  "number_cards",
+  "section_break_2",
+  "charts_label",
   "charts",
   "tab_break_15",
   "shortcuts",
@@ -155,11 +160,35 @@
    "fieldname": "roles_tab",
    "fieldtype": "Tab Break",
    "label": "Roles"
+  },
+  {
+   "depends_on": "extends_another_page",
+   "description": "Sets the current page as default for all users",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Is Default"
+  },
+  {
+   "fieldname": "sb_number_cards",
+   "fieldtype": "Section Break",
+   "label": "Number Cards"
+  },
+  {
+   "depends_on": "eval:!doc.extends_another_page || !doc.is_standard",
+   "fieldname": "number_cards_label",
+   "fieldtype": "Data",
+   "label": "Label"
+  },
+  {
+   "fieldname": "number_cards",
+   "fieldtype": "Table",
+   "label": "Number Cards",
+   "options": "Workspace Number Card"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2022-01-27 12:06:13.111743",
+ "modified": "2022-01-28 12:06:13.111743",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Workspace",

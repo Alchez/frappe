@@ -82,10 +82,10 @@ def get_result(doc, filters, to_date=None):
 	else:
 		fields = ['{function}({based_on}) as result'.format(function=function, based_on=doc.aggregate_function_based_on)]
 
-	filters = frappe.parse_json(filters)
-
 	if not filters:
 		filters = []
+	elif isinstance(filters, str):
+		filters = frappe.parse_json(filters)
 
 	if to_date:
 		filters.append([doc.document_type, 'creation', '<', to_date])
@@ -158,6 +158,7 @@ def get_cards_for_user(doctype, txt, searchfield, start, page_len, filters):
 
 	search_conditions = 'and (' + search_conditions +')' if search_conditions else ''
 	conditions, values = frappe.db.build_conditions(filters)
+	conditions = conditions + " and " if conditions else ""
 	values['txt'] = '%' + txt + '%'
 
 	return frappe.db.sql(
@@ -166,7 +167,7 @@ def get_cards_for_user(doctype, txt, searchfield, start, page_len, filters):
 		from
 			`tabNumber Card`
 		where
-			{conditions} and
+			{conditions}
 			(`tabNumber Card`.owner = '{user}' or
 			`tabNumber Card`.is_public = 1)
 			{search_conditions}

@@ -2,6 +2,7 @@
 import Header from "./header";
 import Paragraph from "./paragraph";
 import Card from "./card";
+import NumberCard from "./number_card";
 import Chart from "./chart";
 import Shortcut from "./shortcut";
 import Spacer from "./spacer";
@@ -16,6 +17,7 @@ frappe.workspace_block.blocks = {
 	header: Header,
 	paragraph: Paragraph,
 	card: Card,
+	number_card: NumberCard,
 	chart: Chart,
 	shortcut: Shortcut,
 	spacer: Spacer,

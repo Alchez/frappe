@@ -144,7 +144,6 @@ class Workspace:
 
 	def build_workspace(self):
 		self.number_cards = {
-			'label': _(self.doc.number_cards_label),
 			'items': self.get_number_cards(),
 		}
 
@@ -205,11 +204,7 @@ class Workspace:
 	def get_number_cards(self):
 		all_number_cards = []
 		if frappe.has_permission("Number Card", throw=False):
-			number_cards = self.doc.number_cards
-			if len(self.extended_number_cards):
-				number_cards = number_cards + self.extended_number_cards
-
-			for number_card in number_cards:
+			for number_card in self.doc.number_cards:
 				if frappe.has_permission(
 					"Number Card", doc=number_card.number_card_name
 				):
@@ -460,6 +455,8 @@ def save_new_widget(doc, page, blocks, new_widgets):
 	if loads(new_widgets):
 		widgets = _dict(loads(new_widgets))
 
+		if widgets.number_card:
+			doc.number_cards.extend(new_widget(widgets.number_card, "Workspace Number Card", "number_cards"))
 		if widgets.chart:
 			doc.charts.extend(new_widget(widgets.chart, "Workspace Chart", "charts"))
 		if widgets.shortcut:
@@ -489,26 +486,33 @@ def save_new_widget(doc, page, blocks, new_widgets):
 	return True
 
 def clean_up(original_page, blocks):
+	blocks = loads(blocks)
 	page_widgets = {}
 
-	for wid in ['shortcut', 'card', 'chart']:
+	for wid in ["shortcut", "number_card", "card", "chart"]:
 		# get list of widget's name from blocks
-		page_widgets[wid] = [x['data'][wid + '_name'] for x in loads(blocks) if x['type'] == wid]
+		page_widgets[wid] = [
+			block["data"][wid + "_name"] for block in blocks if block["type"] == wid
+		]
 
-	# shortcut & chart cleanup
-	for wid in ['shortcut', 'chart']:
+	# shortcut, number card & chart cleanup
+	for wid in ["shortcut", "number_card", "chart"]:
 		updated_widgets = []
-		original_page.get(wid+'s').reverse()
 
-		for w in original_page.get(wid+'s'):
-			if w.label in page_widgets[wid] and w.label not in [x.label for x in updated_widgets]:
-				updated_widgets.append(w)
-		original_page.set(wid+'s', updated_widgets)
+		original_widgets = original_page.get(wid + "s")
+		original_widgets.reverse()
+
+		for widget in original_widgets:
+			if widget.label in page_widgets[wid] and widget.label not in [
+				updated_widget.label for updated_widget in updated_widgets
+			]:
+				updated_widgets.append(widget)
+		original_page.set(wid + "s", updated_widgets)
 
 	# card cleanup
-	for i, v in enumerate(original_page.links):
-		if v.type == 'Card Break' and v.label not in page_widgets['card']:
-			del original_page.links[i : i+v.link_count+1]
+	for i, link in enumerate(original_page.links):
+		if link.type == "Card Break" and link.label not in page_widgets["card"]:
+			del original_page.links[i:i + link.link_count + 1]
 
 def new_widget(config, doctype, parentfield):
 	if not config:

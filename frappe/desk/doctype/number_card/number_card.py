@@ -3,6 +3,7 @@
 # License: MIT. See LICENSE
 
 import frappe
+from frappe.database.query import Query
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.model.naming import append_number_if_name_exists
@@ -143,40 +144,18 @@ def create_number_card(args):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cards_for_user(doctype, txt, searchfield, start, page_len, filters):
-	meta = frappe.get_meta(doctype)
-	searchfields = meta.get_search_fields()
-	search_conditions = []
-
-	if not frappe.db.exists('DocType', doctype):
-		return
-
-	if txt:
-		for field in searchfields:
-			search_conditions.append('`tab{doctype}`.`{field}` like %(txt)s'.format(field=field, doctype=doctype, txt=txt))
-
-		search_conditions = ' or '.join(search_conditions)
-
-	search_conditions = 'and (' + search_conditions +')' if search_conditions else ''
-	conditions, values = frappe.db.build_conditions(filters)
-	conditions = conditions + " and " if conditions else ""
-	values['txt'] = '%' + txt + '%'
-
-	return frappe.db.sql(
-		'''select
-			`tabNumber Card`.name, `tabNumber Card`.label, `tabNumber Card`.document_type
-		from
-			`tabNumber Card`
-		where
-			{conditions}
-			(`tabNumber Card`.owner = '{user}' or
-			`tabNumber Card`.is_public = 1)
-			{search_conditions}
-	'''.format(
-		filters=filters,
-		user=frappe.session.user,
-		search_conditions=search_conditions,
-		conditions=conditions
-	), values)
+	number_card = frappe.qb.DocType(doctype)
+	result = (
+		Query()
+		.build_conditions(doctype, filters)
+		.select(number_card.name, number_card.label, number_card.document_type)
+		.where(getattr(number_card, searchfield).like(f"%{txt}%"))
+		.where(
+			(number_card.owner == frappe.session.user) | (number_card.is_public == 1)
+		)
+		.run()
+	)
+	return result
 
 @frappe.whitelist()
 def create_report_number_card(args):

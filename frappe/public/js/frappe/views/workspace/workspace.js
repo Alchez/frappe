@@ -321,6 +321,7 @@ frappe.views.Workspace = class Workspace {
 	prepare_editorjs() {
 		if (this.editor) {
 			this.editor.isReady.then(() => {
+				this.editor.configuration.tools.number_card.page_data = this.page_data;
 				this.editor.configuration.tools.chart.config.page_data = this.page_data;
 				this.editor.configuration.tools.shortcut.config.page_data = this.page_data;
 				this.editor.configuration.tools.card.config.page_data = this.page_data;
@@ -1095,6 +1096,12 @@ frappe.views.Workspace = class Workspace {
 				inlineToolbar: ['HeaderSize', 'bold', 'italic', 'link'],
 				config: {
 					placeholder: 'Choose a block or continue typing'
+				}
+			},
+			number_card: {
+				class: this.blocks['number_card'],
+				config: {
+					page_data: this.page_data || []
 				}
 			},
 			chart: {

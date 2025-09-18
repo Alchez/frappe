@@ -35,7 +35,23 @@ EMAIL_STRING_PATTERN = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-
 NON_MD_HTML_PATTERN = re.compile(r"<p[\s]*>|<br[\s]*>")
 HTML_TAGS_PATTERN = re.compile(r"\<[^>]*\>")
 INCLUDE_DIRECTIVE_PATTERN = re.compile("""({% include ['"]([^'"]*)['"] %})""")
-PHONE_NUMBER_PATTERN = re.compile(r"([0-9\ \+\_\-\,\.\*\#\(\)]){1,20}$")
+PHONE_NUMBER_PATTERN = re.compile(
+	r"^"
+	r"(?:"
+		r"(?:\+(?:[1-9]|[1-9][0-9]|[1-9][0-9]{2})(?![0-9])*)?"  # Optional country code (+1 to +999)
+		r"(?:\([0-9]{1,6}\)|[0-9]{1,6})"  # Area code in parens OR first digit group (1-6 digits)
+		r"(?:[\s\-\.]*[0-9]{1,5})+"  # Additional digit groups with separators (at least one)
+	r")"
+	r"(?:"  # Optional extension part
+		r"[\s,]*"  # Spaces or commas before extension
+		r"(?:ext\.?|x|,)*"  # Extension indicators or commas
+		r"[\s]*"  # Optional spaces
+		r"[0-9]{1,6}"  # Extension digits (1-6 digits)
+		r"[#]*"  # Optional trailing hash symbols
+	r")*"
+	r"$",
+	re.IGNORECASE,
+)
 PERSON_NAME_PATTERN = re.compile(r"^[\w][\w\'\-]*( \w[\w\'\-]*)*$")
 WHITESPACE_PATTERN = re.compile(r"[\t\n\r]")
 MULTI_EMAIL_STRING_PATTERN = re.compile(r'[,\n](?=(?:[^"]|"[^"]*")*$)')
